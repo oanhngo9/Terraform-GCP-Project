@@ -27,25 +27,25 @@ resource "null_resource" "set_project" {
   }
 }
 
-resource "null_resource" "unset-project" {
+resource "null_resource" "unset_project" {
   provisioner "local-exec" {
     when    = destroy
     command = "gcloud config unset project"
   }
 }
 
-
-resource "null_resource" "enable-apis" {
+resource "null_resource" "enable_apis" {
   depends_on = [
-    google_project.testproject,
-    null_resource.set-project
+    google_project.terraform_gcp_project,
+    null_resource.set_project
   ]
   triggers = {
     always_run = "${timestamp()}"
   }
+}
 
-  provisioner "local-exec" {
-    command = <<-EOT
+provisioner "local-exec" {
+  command = <<-EOT
         gcloud services enable compute.googleapis.com
         gcloud services enable dns.googleapis.com
         gcloud services enable storage-api.googleapis.com
@@ -53,5 +53,4 @@ resource "null_resource" "enable-apis" {
         gcloud services enable file.googleapis.com
        gcloud services enable sqladmin.googleapis.com
     EOT
-  }
 }
