@@ -23,7 +23,7 @@ resource "null_resource" "set-project" {
     }
 	
 	provisioner "local-exec" {
-	    command = "gcloud config set project ${google_project.testproject.project_id}"
+	    command = "gcloud config set project ${google_project.terraform_gcp_project.project_id}"
 	}
 }
 
