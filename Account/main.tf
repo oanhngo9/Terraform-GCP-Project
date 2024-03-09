@@ -11,19 +11,19 @@ resource "random_password" "password" {
   upper   = false
 }
 
-resource "google_project" "terraform-gcp-project" {
+resource "google_project" "terraform_gcp_project" {
   name            = "terraform-gcp-project"
   project_id      = random_password.password.result
   billing_account = data.google_billing_account.acct.id
 }
 
-resource "null_resource" "set-project" {
+resource "null_resource" "set_project" {
   triggers = {
     always_run = "${timestamp()}"
   }
 
   provisioner "local-exec" {
-    command = "gcloud config set project ${google_project.terraform-gcp-project.project_id}"
+    command = "gcloud config set project ${google_project.terraform_gcp_project.project_id}"
   }
 }
 
