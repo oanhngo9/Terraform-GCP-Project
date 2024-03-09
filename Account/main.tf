@@ -42,15 +42,15 @@ resource "null_resource" "enable_apis" {
   triggers = {
     always_run = "${timestamp()}"
   }
-}
 
-provisioner "local-exec" {
-  command = <<-EOT
-        gcloud services enable compute.googleapis.com
-        gcloud services enable dns.googleapis.com
-        gcloud services enable storage-api.googleapis.com
-        gcloud services enable container.googleapis.com
-        gcloud services enable file.googleapis.com
-       gcloud services enable sqladmin.googleapis.com
+  provisioner "local-exec" {
+    command = <<-EOT
+      gcloud services enable compute.googleapis.com
+      gcloud services enable dns.googleapis.com
+      gcloud services enable storage-api.googleapis.com
+      gcloud services enable container.googleapis.com
+      gcloud services enable file.googleapis.com
+      gcloud services enable sqladmin.googleapis.com
     EOT
+  }
 }
