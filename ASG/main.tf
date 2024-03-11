@@ -73,3 +73,39 @@ resource "google_service_networking_connection" "private_vpc_connection" {
   service                 = "servicenetworking.googleapis.com"
   reserved_peering_ranges = [google_compute_global_address.private_ip_address.name]
 }
+
+resource "google_compute_backend_service" "default" {
+  name        = "my-backend-service"
+  port_name   = "http"
+  protocol    = "HTTP"
+  timeout_sec = 10
+
+  backend {
+    group = google_compute_instance_group_manager.foobar.instance_group
+  }
+
+  health_checks = [google_compute_http_health_check.default.self_link]
+}
+
+resource "google_compute_url_map" "default" {
+  name            = "my-url-map"
+  default_service = google_compute_backend_service.default.self_link
+}
+
+resource "google_compute_target_http_proxy" "default" {
+  name    = "my-http-proxy"
+  url_map = google_compute_url_map.default.self_link
+}
+
+resource "google_compute_global_forwarding_rule" "default" {
+  name       = "my-forwarding-rule"
+  target     = google_compute_target_http_proxy.default.self_link
+  port_range = "80"
+}
+
+resource "google_compute_http_health_check" "default" {
+  name               = "my-http-health-check"
+  request_path       = "/"
+  check_interval_sec = 1
+  timeout_sec        = 1
+}
