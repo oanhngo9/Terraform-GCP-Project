@@ -126,6 +126,9 @@ resource "google_sql_database_instance" "instance" {
   }
 }
 
+resource "google_compute_instance_group_manager" "asg_instance" {
+  count = 0 // set count to 0 to delete 
+
 # Create a Cloud SQL user with the randomly generated password
 resource "google_sql_user" "users" {
   provider = google-beta
