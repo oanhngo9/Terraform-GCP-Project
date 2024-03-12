@@ -78,7 +78,7 @@ data "google_compute_image" "debian" {
 }
 
 # Create Firewall
-esource "google_compute_firewall" "firewall" {
+resource "google_compute_firewall" "firewall" {
   provider = google-beta
   name    = "firewall-rule-name"
   network = google_compute_network.vpc_network.self_link
