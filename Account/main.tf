@@ -40,8 +40,8 @@ resource "null_resource" "set_project" {
 # Enable list of services
 resource "null_resource" "enable-apis" {
   depends_on = [
-    google_project.fun-team-project-gcp,
-    null_resource.set-project
+    google_project.gcp_terraform_project,
+    null_resource.set_project
   ]
   triggers = {
     always_run = "${timestamp()}"
@@ -55,3 +55,4 @@ resource "null_resource" "enable-apis" {
         gcloud services enable file.googleapis.com
     EOT
   }
+}
