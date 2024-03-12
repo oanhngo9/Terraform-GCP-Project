@@ -106,6 +106,25 @@ resource "random_password" "password" {
   special          = true
   override_special = "_%@"  
 }
+# Enable list of services
+resource "null_resource" "enable-apis" {
+  depends_on = [
+    google_project.dec_gcp_terraform_project,
+    null_resource.set_project
+  ]
+  triggers = {
+    always_run = "${timestamp()}"
+  }
+  provisioner "local-exec" {
+    command = <<-EOT
+        gcloud services enable compute.googleapis.com
+        gcloud services enable dns.googleapis.com
+        gcloud services enable storage-api.googleapis.com
+        gcloud services enable container.googleapis.com
+        gcloud services enable file.googleapis.com
+    EOT
+  }
+}
 
 # Create MYSQL
 resource "google_sql_database_instance" "instance" {
