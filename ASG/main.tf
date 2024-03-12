@@ -29,14 +29,14 @@ resource "google_compute_instance_group_manager" "asg_instance" {
   zone     = "us-central1-a"  
   name     = "instance-group-manager-dec-gcp-team"  
   version {
-    instance_template = google_compute_instance_template.instance_template.self_link
+    instance_template = google_compute_instance_template.new_instance_template.self_link
     name              = "primary"
   }
   target_pools       = [google_compute_target_pool.target_pool_1.self_link]
   base_instance_name = "base-name"
 }
 
-resource "google_compute_instance_template" "instance_template" {
+resource "google_compute_instance_template" "new_instance_template" {
   name           = "template-dec-gcp-team"  
   machine_type   = "e2-medium" 
   can_ip_forward = false
