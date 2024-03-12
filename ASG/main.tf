@@ -3,6 +3,7 @@ resource "google_compute_network" "dec_vpc_network" {
   name = "dec-vpc-network"
   routing_mode = "GLOBAL"
   auto_create_subnetworks = true
+}
 
 resource "google_compute_global_address" "private_ip_address" {
   name          = "private-ip-address"
