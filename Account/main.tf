@@ -11,7 +11,7 @@ resource "random_password" "password" {
   upper   = false
 }
 
-resource "google_project" "gcp-terraform-project" {
+resource "google_project" "gcp_terraform_project" {
   name            = "gcp-terraform-project"
   project_id      = random_password.password.result
   billing_account = data.google_billing_account.acct.id
