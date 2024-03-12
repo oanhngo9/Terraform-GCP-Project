@@ -112,6 +112,8 @@ resource "google_sql_database_instance" "instance" {
   provider = google-beta
   name     = "dec-gcp-team-wordpress-database"
   region   = "us-central1"
+  database_version = "MYSQL_5_7" // Add this line
+
   settings {
     tier = "db-f1-micro"
     ip_configuration {
