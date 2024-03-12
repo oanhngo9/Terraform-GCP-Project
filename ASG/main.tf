@@ -79,7 +79,7 @@ SCRIPT
 
 data "google_compute_image" "debian" {  
   provider = google-beta
-  family   = "debian-9"
+  family   = "debian-10"
   project  = "debian-cloud"
 }
 
