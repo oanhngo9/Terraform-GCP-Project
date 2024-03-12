@@ -27,16 +27,9 @@ resource "null_resource" "set_project" {
   }
 }
 
-resource "null_resource" "unset_project" {
-  provisioner "local-exec" {
-    when    = destroy
-    command = "gcloud config unset project"
-  }
-}
-
 resource "null_resource" "enable_apis" {
   depends_on = [
-    google_project.gcp-terraform-project,
+    google_project.gcp_terraform_project,
     null_resource.set_project
   ]
   triggers = {
