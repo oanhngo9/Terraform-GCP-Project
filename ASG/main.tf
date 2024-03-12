@@ -97,7 +97,14 @@ resource "google_compute_forwarding_rule" "fr" {
   region   = "us-central1"
 
   target = google_compute_target_pool.target_pool_1.self_link
-  port_range =80"
+  port_range = "80"
+}
+
+# Generate a random password
+resource "random_password" "password" {
+  length           = 16
+  special          = true
+  override_special = "_%@"  
 }
 
 # Create MYSQL
