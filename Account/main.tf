@@ -1,8 +1,10 @@
+# Show Billing Account Infomation
 data "google_billing_account" "acct" {
   display_name = "My Billing Account"
   open         = true
 }
 
+# Generate 16 characters random password 
 resource "random_password" "password" {
   length  = 16
   numeric = false
@@ -11,6 +13,7 @@ resource "random_password" "password" {
   upper   = false
 }
 
+# Create new Project_ID
 provider "random" {}
 
 resource "random_id" "project_id" {
@@ -23,6 +26,7 @@ resource "google_project" "gcp_terraform_project" {
   billing_account = data.google_billing_account.acct.id
 }
 
+# Set terminal to the project
 resource "null_resource" "set_project" {
   triggers = {
     always_run = "${timestamp()}"
@@ -33,3 +37,21 @@ resource "null_resource" "set_project" {
   }
 }
 
+# Enable list of services
+resource "null_resource" "enable-apis" {
+  depends_on = [
+    google_project.fun-team-project-gcp,
+    null_resource.set-project
+  ]
+  triggers = {
+    always_run = "${timestamp()}"
+  }
+  provisioner "local-exec" {
+    command = <<-EOT
+        gcloud services enable compute.googleapis.com
+        gcloud services enable dns.googleapis.com
+        gcloud services enable storage-api.googleapis.com
+        gcloud services enable container.googleapis.com
+        gcloud services enable file.googleapis.com
+    EOT
+  }
