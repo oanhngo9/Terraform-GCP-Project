@@ -17,7 +17,7 @@ resource "google_compute_autoscaler" "asg" {
   }
 }
 
-resource "google_compute_target_pool" "target_pool" {
+resource "google_compute_target_pool" "target_pool_1" {
   provider = google-beta
   region   = "us-central1"  
   name     = "dec-gcp-team" 
@@ -33,7 +33,7 @@ resource "google_compute_instance_group_manager" "asg_instance" {
     instance_template = google_compute_instance_template.instance_template.self_link
     name              = "primary"
   }
-  target_pools       = [google_compute_target_pool.target_pool.self_link]
+  target_pools       = [google_compute_target_pool.target_pool_1.self_link]
   base_instance_name = "base-name"
 }
 
@@ -103,11 +103,11 @@ resource "google_compute_forwarding_rule" "fr" {
   name     = "forwarding-rule-name"
   region   = "us-central1"
 
-  target = google_compute_target_pool.target_pool.self_link
+  target = google_compute_target_pool.target_pool_1.self_link
   port_range = "80"
 }
 
-resource "google_compute_target_pool" "target_pool" {
+resource "google_compute_target_pool" "target_pool_2" {
   provider = google-beta
   region   = "us-central1"
   name     = "target-pool-name"
