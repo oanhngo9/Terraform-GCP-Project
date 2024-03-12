@@ -20,8 +20,8 @@ resource "random_id" "project_id" {
   byte_length = 8
 }
 
-resource "google_project" "dec_terraform_project" {
-  name            = "dec-terraform-project"
+resource "google_project" "dec_gcp_terraform_project" {
+  name            = "dec-gcp-terraform-project"
   project_id      = "gcp-${random_id.project_id.hex}"
   billing_account = data.google_billing_account.acct.id
 }
@@ -33,14 +33,14 @@ resource "null_resource" "set_project" {
   }
 
   provisioner "local-exec" {
-    command = "gcloud config set project ${google_project.dec_terraform_project.project_id}"
+    command = "gcloud config set project ${google_project.dec_gcp_terraform_project.project_id}"
   }
 }
 
 # Enable list of services
 resource "null_resource" "enable-apis" {
   depends_on = [
-    google_project.dec_terraform_project,
+    google_project.dec_gcp_terraform_project,
     null_resource.set_project
   ]
   triggers = {
