@@ -107,6 +107,10 @@ resource "random_password" "password" {
   override_special = "_%@"  
 }
 
+# Delete Instance Group
+resource "google_compute_instance_group_manager" "asg_instance" {
+  count = 0 // set count to 0 to delete this resource
+
 # Create MYSQL
 resource "google_sql_database_instance" "instance" {
   provider = google-beta
