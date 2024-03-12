@@ -65,7 +65,7 @@ SCRIPT
     source_image = data.google_compute_image.debian.self_link  
   }
   network_interface {
-    network = google_compute_network.vpc_network.self_link
+    network = oanh-vpc-network
     access_config {
     }
   }
@@ -81,7 +81,7 @@ data "google_compute_image" "debian" {
 resource "google_compute_firewall" "firewall" {
   provider = google-beta
   name    = "firewall-rule-name"
-  network = google_compute_network.vpc_network.self_link
+  network = oanh-vpc-network
 
   allow {
     protocol = "tcp"
