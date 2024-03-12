@@ -126,7 +126,7 @@ resource "google_sql_database_instance" "instance" {
   provider = google-beta
   name     = "dec-gcp-team-wordpress-database"
   region   = "us-central1"
-  database_version = "MYSQL_5_7" // Add this line
+  database_version = "MYSQL_5_7"
 
   settings {
     tier = "db-f1-micro"
@@ -138,6 +138,8 @@ resource "google_sql_database_instance" "instance" {
       enabled = true
     }
   }
+
+  depends_on = [google_service_networking_connection.private_vpc_connection]
 }
 
 # Create a Cloud SQL user with the randomly generated password
