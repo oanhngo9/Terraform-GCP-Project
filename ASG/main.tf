@@ -1,3 +1,8 @@
+module "vpc" {
+  source = "/Terraform-GCP-Project/VPC"  
+}
+
+
 # Create ASG for the project
 resource "google_compute_autoscaler" "asg" {
   provider = google-beta
@@ -65,7 +70,7 @@ SCRIPT
     source_image = data.google_compute_image.debian.self_link  
   }
   network_interface {
-    network = google_compute_network.gcp_vpc_network.self_link
+    network = module.vpc.vpc_self_link
     access_config {
     }
   }
@@ -81,7 +86,7 @@ data "google_compute_image" "debian" {
 resource "google_compute_firewall" "firewall" {
   provider = google-beta
   name    = "firewall-rule-name"
-  network = google_compute_network.gcp_vpc_network.self_link
+  network = module.vpc.vpc_self_link
 
   allow {
     protocol = "tcp"
