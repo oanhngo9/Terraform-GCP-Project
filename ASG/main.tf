@@ -1,9 +1,6 @@
 # Create ASG for the project
 resource "google_compute_autoscaler" "asg" {
   provider = google-beta
-  depends_on = [
-    google_sql_database_instance.instance,
-  ]
   zone   = "us-central1-a"  
   name   = "GCP TEAM"  
   target = google_compute_instance_group_manager.asg_instance.self_link
@@ -39,9 +36,6 @@ resource "google_compute_instance_group_manager" "asg_instance" {
 
 resource "google_compute_instance_template" "instance_template" {
   provider = google-beta
-  depends_on = [
-    google_sql_database_instance.instance,
-  ]
   name           = "template-dec-gcp-team"  
   machine_type   = "e2-medium" 
   can_ip_forward = false
@@ -71,7 +65,7 @@ SCRIPT
     source_image = data.google_compute_image.debian.self_link  
   }
   network_interface {
-    network = google_compute_network.vpc.id
+    network = google_compute_network.vpc_network.self_link
     access_config {
     }
   }
@@ -84,10 +78,10 @@ data "google_compute_image" "debian" {
 }
 
 # Create Firewall
-resource "google_compute_firewall" "firewall" {
+esource "google_compute_firewall" "firewall" {
   provider = google-beta
   name    = "firewall-rule-name"
-  network = google_compute_network.vpc.name
+  network = google_compute_network.vpc_network.self_link
 
   allow {
     protocol = "tcp"
