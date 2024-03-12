@@ -97,14 +97,14 @@ resource "google_compute_forwarding_rule" "fr" {
   region   = "us-central1"
 
   target = google_compute_target_pool.target_pool_1.self_link
-  port_range = "80"
+  port_range =80"
 }
 
 # Generate a random password
 resource "random_password" "password" {
   length           = 16
   special          = true
-  override_special = "_%@"  # Override the list of special characters to use
+  override_special = "_%@"  
 }
 
 resource "google_sql_database_instance" "instance" {
@@ -115,18 +115,12 @@ resource "google_sql_database_instance" "instance" {
     tier = "db-f1-micro"
     ip_configuration {
       ipv4_enabled    = true
-      private_network = google_compute_network.gcp_vpc_network.self_link
+      private_network = google_compute_network.gcp_vpc_network.self_link  
     }
     backup_configuration {
       enabled = true
     }
   }
-}
-
-resource "google_sql_database" "database" {
-  provider = google-beta
-  name     = "wordpress"
-  instance = google_sql_database_instance.instance.name
 }
 
 # Create a Cloud SQL user with the randomly generated password
