@@ -1,5 +1,5 @@
 module "vpc" {
-  source = "./VPC"  
+  source = "/home/nassalonandspa/Terraform-GCP-Project/VPC"
 }
 
 
