@@ -1,7 +1,9 @@
-module "vpc" {
-  source = "/home/nassalonandspa/Terraform-GCP-Project/VPC"
+# Create VPC for the project
+resource "google_compute_network" "gcp_vpc_network" {
+  name = "dec-vpc-network"
+  routing_mode = "GLOBAL"
+  auto_create_subnetworks = true
 }
-
 
 # Create ASG for the project
 resource "google_compute_autoscaler" "asg" {
