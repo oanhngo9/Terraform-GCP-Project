@@ -67,7 +67,7 @@ SCRIPT
     source_image = data.google_compute_image.debian.self_link  
   }
   network_interface {
-    network = google_compute_network.gcp_vpc_network.self_link  
+    network = google_compute_network.dec_vpc_network.self_link  
     access_config {
     }
   }
@@ -81,7 +81,7 @@ data "google_compute_image" "debian" {
 # Create Firewall
 resource "google_compute_firewall" "firewall" {
   name    = "firewall-rule-name"
-  network = google_compute_network.gcp_vpc_network.self_link  
+  network = google_compute_network.dec_vpc_network.self_link  
 
   allow {
     protocol = "tcp"
@@ -116,7 +116,7 @@ resource "google_sql_database_instance" "instance" {
     tier = "db-f1-micro"
     ip_configuration {
       ipv4_enabled    = true
-      private_network = google_compute_network.gcp_vpc_network.self_link  
+      private_network = google_compute_network.dec_vpc_network.self_link  
     }
     backup_configuration {
       enabled = true
