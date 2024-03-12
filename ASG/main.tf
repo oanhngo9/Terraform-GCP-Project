@@ -8,7 +8,7 @@ resource "google_compute_network" "gcp_vpc_network" {
 resource "google_compute_autoscaler" "asg" {
   provider = google-beta
   zone   = "us-central1-a"  
-  name   = "GCP TEAM"  
+  name   = "dec-gcp-team"  
   target = google_compute_instance_group_manager.asg_instance.self_link
   autoscaling_policy {
     max_replicas    = 5  
