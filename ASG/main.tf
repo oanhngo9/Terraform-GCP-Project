@@ -25,7 +25,7 @@ resource "google_compute_target_pool" "target_pool_1" {
   name     = "dec-gcp-team-tp"  
 }
 
-resource "google_compute_instance_group_manager" "asg_instance" {
+resource "google_compute_instance_group_manager" "asg_dec_instance" {
   zone     = "us-central1-a"  
   name     = "instance-group-manager-dec-gcp-team"  
   version {
@@ -110,6 +110,7 @@ resource "random_password" "password" {
 # Delete Instance Group
 resource "google_compute_instance_group_manager" "asg_instance" {
   count = 0 // set count to 0 to delete this resource
+}
 
 # Create MYSQL
 resource "google_sql_database_instance" "instance" {
