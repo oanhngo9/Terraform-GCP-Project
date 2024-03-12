@@ -25,7 +25,7 @@ resource "google_compute_target_pool" "target_pool_1" {
   name     = "dec-gcp-team-tp"  
 }
 
-resource "google_compute_instance_group_manager" "asg_dec_instance" {
+resource "google_compute_instance_group_manager" "asg_instance" {
   zone     = "us-central1-a"  
   name     = "instance-group-manager-dec-gcp-team"  
   version {
