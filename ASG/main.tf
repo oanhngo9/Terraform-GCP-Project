@@ -1,5 +1,5 @@
 module "vpc" {
-  source = "../Terraform-GCP-Project/VPC"  
+  source = "./VPC"  
 }
 
 
