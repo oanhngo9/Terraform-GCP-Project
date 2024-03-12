@@ -40,7 +40,7 @@ resource "null_resource" "set_project" {
 # Enable list of services
 resource "null_resource" "enable-apis" {
   depends_on = [
-    google_project.gcp_terraform_project,
+    google_project.dec_terraform_project,
     null_resource.set_project
   ]
   triggers = {
