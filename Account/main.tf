@@ -11,9 +11,15 @@ resource "random_password" "password" {
   upper   = false
 }
 
+provider "random" {}
+
+resource "random_id" "project_id" {
+  byte_length = 8
+}
+
 resource "google_project" "gcp_terraform_project" {
   name            = "gcp-terraform-project"
-  project_id      = random_password.password.result
+  project_id      = "gcp-${random_id.project_id.hex}"
   billing_account = data.google_billing_account.acct.id
 }
 
@@ -27,23 +33,3 @@ resource "null_resource" "set_project" {
   }
 }
 
-resource "null_resource" "enable_apis" {
-  depends_on = [
-    google_project.gcp_terraform_project,
-    null_resource.set_project
-  ]
-  triggers = {
-    always_run = "${timestamp()}"
-  }
-
-  provisioner "local-exec" {
-    command = <<-EOT
-      gcloud services enable compute.googleapis.com
-      gcloud services enable dns.googleapis.com
-      gcloud services enable storage-api.googleapis.com
-      gcloud services enable container.googleapis.com
-      gcloud services enable file.googleapis.com
-      gcloud services enable sqladmin.googleapis.com
-    EOT
-  }
-}
