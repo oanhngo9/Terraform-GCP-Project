@@ -17,7 +17,7 @@ resource "random_password" "password" {
 provider "random" {}
 
 resource "random_id" "project_id" {
-  byte_length = 8
+  byte_length = 12
 }
 
 resource "google_project" "dec_gcp_terraform_project" {
