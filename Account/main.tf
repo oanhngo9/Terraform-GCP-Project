@@ -36,7 +36,7 @@ resource "null_resource" "unset_project" {
 
 resource "null_resource" "enable_apis" {
   depends_on = [
-    google_project.terraform_gcp_project,
+    google_project.gcp-terraform-project,
     null_resource.set_project
   ]
   triggers = {
