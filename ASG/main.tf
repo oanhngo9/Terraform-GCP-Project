@@ -7,9 +7,8 @@ resource "google_compute_network" "gcp_vpc_network" {
 
 # Create ASG for the project
 resource "google_compute_autoscaler" "asg" {
-  provider = google-beta
   zone   = "us-central1-a"  
-  name   = "dec-gcp-team"  
+  name   = "dec-gcp-team-asg" 
   target = google_compute_instance_group_manager.asg_instance.self_link
   autoscaling_policy {
     max_replicas    = 5  
@@ -22,17 +21,13 @@ resource "google_compute_autoscaler" "asg" {
 }
 
 resource "google_compute_target_pool" "target_pool_1" {
-  provider = google-beta
   region   = "us-central1"  
-  name     = "dec-gcp-team" 
-  project  = "gcp-terraform-project"  
+  name     = "dec-gcp-team-tp"  
 }
 
 resource "google_compute_instance_group_manager" "asg_instance" {
-  provider = google-beta
   zone     = "us-central1-a"  
   name     = "instance-group-manager-dec-gcp-team"  
-  project  = "gcp-terraform-project"  
   version {
     instance_template = google_compute_instance_template.instance_template.self_link
     name              = "primary"
@@ -42,13 +37,13 @@ resource "google_compute_instance_group_manager" "asg_instance" {
 }
 
 resource "google_compute_instance_template" "instance_template" {
-  provider = google-beta
   name           = "template-dec-gcp-team"  
   machine_type   = "e2-medium" 
   can_ip_forward = false
-  project        = "gcp-terraform-project"  
 
   metadata_startup_script = <<SCRIPT
+  #!/bin/bash
+  set -e  # Stop the script if any command fails
   sudo apt-get update
   sudo apt-get install -y apache2 unzip wget
   sudo systemctl start apache2
@@ -72,23 +67,21 @@ SCRIPT
     source_image = data.google_compute_image.debian.self_link  
   }
   network_interface {
-    network = module.vpc.vpc_self_link
+    network = google_compute_network.gcp_vpc_network.self_link  
     access_config {
     }
   }
 }
 
 data "google_compute_image" "debian" {  
-  provider = google-beta
   family   = "debian-10"
   project  = "debian-cloud"
 }
 
 # Create Firewall
 resource "google_compute_firewall" "firewall" {
-  provider = google-beta
   name    = "firewall-rule-name"
-  network = module.vpc.vpc_self_link
+  network = google_compute_network.gcp_vpc_network.self_link  
 
   allow {
     protocol = "tcp"
@@ -100,7 +93,6 @@ resource "google_compute_firewall" "firewall" {
 
 # Create Load Balancer
 resource "google_compute_forwarding_rule" "fr" {
-  provider = google-beta
   name     = "forwarding-rule-name"
   region   = "us-central1"
 
