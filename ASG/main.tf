@@ -97,7 +97,7 @@ resource "google_compute_firewall" "firewall" {
   source_ranges = ["0.0.0.0/0"]
 }
 
-# Create Loan Balancer
+# Create Load Balancer
 resource "google_compute_forwarding_rule" "fr" {
   provider = google-beta
   name     = "forwarding-rule-name"
@@ -105,13 +105,4 @@ resource "google_compute_forwarding_rule" "fr" {
 
   target = google_compute_target_pool.target_pool_1.self_link
   port_range = "80"
-}
-
-resource "google_compute_target_pool" "target_pool_2" {
-  provider = google-beta
-  region   = "us-central1"
-  name     = "target-pool-name"
-  project  = "gcp-terraform-project"
-
-  instances = [google_compute_instance_group_manager.asg_instance.self_link]
 }
