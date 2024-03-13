@@ -1,28 +1,8 @@
 # Create VPC for the project
 resource "google_compute_network" "dec_vpc_network" {
   name = "dec-vpc-network"
-  project = google_project.dec_gcp_team_project.project_id
   routing_mode = "GLOBAL"
   auto_create_subnetworks = true
-}
-
-resource "google_compute_global_address" "private_ip_address" {
-  name          = "private-ip-address"
-  purpose       = "VPC_PEERING"
-  address_type  = "INTERNAL"
-  prefix_length = 16
-  network       = google_compute_network.dec_vpc_network.self_link
-  project       = google_project.dec_gcp_team_project.project_id
-
-  depends_on = [google_project.dec_gcp_team_project]
-}
-
-resource "google_service_networking_connection" "private_vpc_connection" {
-  network                 = google_compute_network.dec_vpc_network.self_link
-  service                 = "servicenetworking.googleapis.com"
-  reserved_peering_ranges = [google_compute_global_address.private_ip_address.name]
-
-  depends_on = [google_project.dec_gcp_team_project]
 }
 
 # Create ASG for the project
@@ -41,8 +21,8 @@ resource "google_compute_autoscaler" "asg" {
 }
 
 resource "google_compute_target_pool" "target_pool_1" {
-  name    = "dec-gcp-team-tp"
-  project = google_project.dec_gcp_team_project.project_id 
+  region   = "us-central1"  
+  name     = "dec-gcp-team-tp"  
 }
 
 resource "google_compute_instance_group_manager" "asg_instance" {
@@ -61,48 +41,35 @@ resource "google_compute_instance_template" "new_instance_template" {
   machine_type   = "e2-medium" 
   can_ip_forward = false
 
-  metadata = {
-    db-name = google_sql_database_instance.instance.name
-    db-user = google_sql_user.users.name
-    db-password = random_password.password.result
-  }
-
-  metadata_startup_script = <<SCRIPT
-  #!/bin/bash
-  set -e  # Stop the script if any command fails
-  sudo apt-get update
-  sudo apt-get install -y apache2 unzip wget
-  sudo systemctl start apache2
-  sudo systemctl enable apache2
-  sudo rm -rf /var/www/html/*
-  cd /tmp
-  wget https://wordpress.org/latest.zip
-  unzip latest.zip
-  sudo mv wordpress/* /var/www/html/
-  sudo apt-get install -y software-properties-common
-  sudo add-apt-repository ppa:ondrej/php
-  sudo apt-get update
-  sudo apt-get install -y php7.3 php7.3-mysql
-  sudo systemctl restart apache2
-  php --version
-  sudo chown -R www-data:www-data /var/www/html
-  # Configure WordPress to connect to the MySQL database
-  DB_NAME=$(curl http://metadata.google.internal/computeMetadata/v1/instance/attributes/db-name -H "Metadata-Flavor: Google")
-  DB_USER=$(curl http://metadata.google.internal/computeMetadata/v1/instance/attributes/db-user -H "Metadata-Flavor: Google")
-  DB_PASSWORD=$(curl http://metadata.google.internal/computeMetadata/v1/instance/attributes/db-password -H "Metadata-Flavor: Google")
-  DOMAIN_NAME=$(curl http://metadata.google.internal/computeMetadata/v1/instance/attributes/domain-name -H "Metadata-Flavor: Google")
-  sudo cp /var/www/html/wp-config-sample.php /var/www/html/wp-config.php
-  sudo bash -c "sed -i \"s/database_name_here/$DB_NAME/g\" /var/www/html/wp-config.php"
-  sudo bash -c "sed -i \"s/username_here/$DB_USER/g\" /var/www/html/wp-config.php"
-  sudo bash -c "sed -i \"s/password_here/$DB_PASSWORD/g\" /var/www/html/wp-config.php"
-  sudo bash -c "echo \"define('WP_HOME','http://$DOMAIN_NAME');\" >> /var/www/html/wp-config.php"
-  sudo bash -c "echo \"define('WP_SITEURL','http://$DOMAIN_NAME');\" >> /var/www/html/wp-config.php"
-  # Install Certbot and obtain an SSL certificate
-  sudo apt-get install -y certbot python-certbot-apache
-  sudo certbot --apache -n --agree-tos --email your-email@example.com -d $DOMAIN_NAME
-  # Update WordPress configuration to use HTTPS
-  sudo bash -c "echo \"define('WP_HOME','https://$DOMAIN_NAME');\" >> /var/www/html/wp-config.php"
-  sudo bash -c "echo \"define('WP_SITEURL','https://$DOMAIN_NAME');\" >> /var/www/html/wp-config.php"
+metadata_startup_script = <<SCRIPT
+#!/bin/bash
+set -e  # Stop the script if any command fails
+sudo apt-get update
+sudo apt-get install -y apache2 unzip wget
+sudo systemctl start apache2
+sudo systemctl enable apache2
+sudo rm -rf /var/www/html/*
+cd /tmp
+wget https://wordpress.org/latest.zip
+unzip latest.zip
+sudo mv wordpress/* /var/www/html/
+sudo apt-get install -y software-properties-common
+sudo add-apt-repository ppa:ondrej/php
+sudo apt-get update
+sudo apt-get install -y php7.3 php7.3-mysql
+sudo systemctl restart apache2
+php --version
+sudo chown -R www-data:www-data /var/www/html
+sudo rm -f /var/www/html/wp-config.php
+cat <<EOF | sudo tee /var/www/html/wp-config.php
+<?php
+define('DB_NAME', '${google_sql_database_instance.instance.name}');
+define('DB_USER', '${google_sql_user.users.name}');
+define('DB_PASSWORD', '${random_password.password.result}');
+define('DB_HOST', '${google_sql_database_instance.instance.ip_address}');
+define('DB_CHARSET', 'utf8');
+define('DB_COLLATE', '');
+EOF
 SCRIPT
 
   disk {
@@ -124,7 +91,6 @@ data "google_compute_image" "debian" {
 resource "google_compute_firewall" "firewall" {
   name    = "firewall-rule-name"
   network = google_compute_network.dec_vpc_network.self_link  
-  project = google_project.dec_gcp_team_project.project_id
 
   allow {
     protocol = "tcp"
@@ -132,20 +98,22 @@ resource "google_compute_firewall" "firewall" {
   }
 
   source_ranges = ["0.0.0.0/0"]
-
-  depends_on = [google_project.dec_gcp_team_project]
 }
 
 # Create Load Balancer
 resource "google_compute_forwarding_rule" "fr" {
   name     = "forwarding-rule-name"
   region   = "us-central1"
-  project  = google_project.dec_gcp_team_project.project_id
 
   target = google_compute_target_pool.target_pool_1.self_link
   port_range = "80"
+}
 
-  depends_on = [google_project.dec_gcp_team_project]
+# Generate a random password
+resource "random_password" "password" {
+  length           = 16
+  special          = true
+  override_special = "_%@"  
 }
 
 # Create MYSQL
@@ -153,7 +121,7 @@ resource "google_sql_database_instance" "instance" {
   provider = google-beta
   name     = "dec-gcp-team-wordpress-database"
   region   = "us-central1"
-  database_version = "MYSQL_5_7"
+  database_version = "MYSQL_5_7" // Add this line
 
   settings {
     tier = "db-f1-micro"
@@ -165,8 +133,6 @@ resource "google_sql_database_instance" "instance" {
       enabled = true
     }
   }
-
-  depends_on = [google_service_networking_connection.private_vpc_connection]
 }
 
 # Create a Cloud SQL user with the randomly generated password
