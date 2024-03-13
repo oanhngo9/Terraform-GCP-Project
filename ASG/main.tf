@@ -55,6 +55,12 @@ resource "google_compute_instance_template" "new_instance_template" {
   machine_type   = "e2-medium" 
   can_ip_forward = false
 
+  metadata = {
+    db-name = google_sql_database_instance.instance.name
+    db-user = google_sql_user.users.name
+    db-password = random_password.password.result
+  }
+
   metadata_startup_script = <<SCRIPT
   #!/bin/bash
   set -e  # Stop the script if any command fails
@@ -74,7 +80,14 @@ resource "google_compute_instance_template" "new_instance_template" {
   sudo systemctl restart apache2
   php --version
   sudo chown -R www-data:www-data /var/www/html
-  sudo rm -f /var/www/html/wp-config.php
+  # Configure WordPress to connect to the MySQL database
+  DB_NAME=$(curl http://metadata.google.internal/computeMetadata/v1/instance/attributes/db-name -H "Metadata-Flavor: Google")
+  DB_USER=$(curl http://metadata.google.internal/computeMetadata/v1/instance/attributes/db-user -H "Metadata-Flavor: Google")
+  DB_PASSWORD=$(curl http://metadata.google.internal/computeMetadata/v1/instance/attributes/db-password -H "Metadata-Flavor: Google")
+  sudo cp /var/www/html/wp-config-sample.php /var/www/html/wp-config.php
+  sudo sed -i "s/database_name_here/$DB_NAME/g" /var/www/html/wp-config.php
+  sudo sed -i "s/username_here/$DB_USER/g" /var/www/html/wp-config.php
+  sudo sed -i "s/password_here/$DB_PASSWORD/g" /var/www/html/wp-config.php
 SCRIPT
 
   disk {
