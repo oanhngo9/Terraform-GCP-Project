@@ -73,6 +73,9 @@ resource "google_compute_global_address" "private_ip_address" {
   address_type  = "INTERNAL"
   prefix_length = 16
   network       = google_compute_network.dec_vpc_network.self_link
+  project       = google_project.gcp_team_project.project_id
+
+  depends_on = [google_project.gcp_team_project]
 }
 
 resource "google_service_networking_connection" "private_vpc_connection" {
@@ -180,6 +183,7 @@ data "google_compute_image" "debian" {
 resource "google_compute_firewall" "firewall" {
   name    = "firewall-rule-name"
   network = google_compute_network.dec_vpc_network.self_link  
+  project = google_project.gcp_team_project.project_id
 
   allow {
     protocol = "tcp"
@@ -187,15 +191,20 @@ resource "google_compute_firewall" "firewall" {
   }
 
   source_ranges = ["0.0.0.0/0"]
+
+  depends_on = [google_project.gcp_team_project]
 }
 
 # Create Load Balancer
 resource "google_compute_forwarding_rule" "fr" {
   name     = "forwarding-rule-name"
   region   = "us-central1"
+  project  = google_project.gcp_team_project.project_id
 
   target = google_compute_target_pool.target_pool_1.self_link
   port_range = "80"
+
+  depends_on = [google_project.gcp_team_project]
 }
 
 # Create MYSQL
