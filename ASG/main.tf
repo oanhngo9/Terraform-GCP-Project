@@ -62,6 +62,7 @@ resource "null_resource" "enable-apis" {
 # Create VPC for the project
 resource "google_compute_network" "dec_vpc_network" {
   name = "dec-vpc-network"
+  project = google_project.gcp_team_project.project_id
   routing_mode = "GLOBAL"
   auto_create_subnetworks = true
 }
@@ -96,8 +97,8 @@ resource "google_compute_autoscaler" "asg" {
 }
 
 resource "google_compute_target_pool" "target_pool_1" {
-  region   = "us-central1"  
-  name     = "dec-gcp-team-tp"  
+  name    = "dec-gcp-team-tp"
+  project = google_project.gcp_team_project.project_id 
 }
 
 resource "google_compute_instance_group_manager" "asg_instance" {
