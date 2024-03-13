@@ -170,16 +170,6 @@ SCRIPT
   }
 }
 
-  disk {
-    source_image = data.google_compute_image.debian.self_link  
-  }
-  network_interface {
-    network = google_compute_network.dec_vpc_network.self_link  
-    access_config {
-    }
-  }
-}
-
 data "google_compute_image" "debian" {  
   family   = "debian-10"
   project  = "debian-cloud"
