@@ -1,19 +1,11 @@
-#!/bin/bash
-set -e  # Stop the script if any command fails
-sudo apt-get update
-sudo apt-get install -y apache2 unzip wget
-sudo systemctl start apache2
-sudo systemctl enable apache2
-sudo rm -rf /var/www/html/*
-cd /tmp
-wget https://wordpress.org/latest.zip
-unzip latest.zip
-sudo mv wordpress/* /var/www/html/
-sudo apt-get install -y software-properties-common
-sudo add-apt-repository ppa:ondrej/php
-sudo apt-get update
-sudo apt-get install -y php7.3 php7.3-mysql
-sudo systemctl restart apache2
-php --version
-sudo chown -R www-data:www-data /var/www/html
-sudo rm -f /var/www/html/wp-config.php}}
+{{{ # Configure WordPress to connect to the MySQL database
+DB_NAME=$(curl http://metadata.google.internal/computeMetadata/v1/instance/attributes/db-name -H "Metadata-Flavor: Google")
+DB_USER=$(curl http://metadata.google.internal/computeMetadata/v1/instance/attributes/db-user -H "Metadata-Flavor: Google")
+DB_PASSWORD=$(curl http://metadata.google.internal/computeMetadata/v1/instance/attributes/db-password -H "Metadata-Flavor: Google")
+DOMAIN_NAME=$(curl http://metadata.google.internal/computeMetadata/v1/instance/attributes/domain-name -H "Metadata-Flavor: Google")
+sudo cp /var/www/html/wp-config-sample.php /var/www/html/wp-config.php
+sudo sed -i "s/database_name_here/$DB_NAME/g" /var/www/html/wp-config.php
+sudo sed -i "s/username_here/$DB_USER/g" /var/www/html/wp-config.php
+sudo sed -i "s/password_here/$DB_PASSWORD/g" /var/www/html/wp-config.php
+echo "define('WP_HOME','http://$DOMAIN_NAME');" >> /var/www/html/wp-config.php
+echo "define('WP_SITEURL','http://$DOMAIN_NAME');" >> /var/www/html/wp-config.php}}}
