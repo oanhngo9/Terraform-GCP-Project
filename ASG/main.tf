@@ -197,13 +197,6 @@ resource "google_compute_forwarding_rule" "fr" {
   port_range = "80"
 }
 
-# Generate a random password
-resource "random_password" "password" {
-  length           = 16
-  special          = true
-  override_special = "_%@"  
-}
-
 # Create MYSQL
 resource "google_sql_database_instance" "instance" {
   provider = google-beta
