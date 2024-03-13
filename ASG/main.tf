@@ -84,11 +84,30 @@ resource "google_compute_instance_template" "new_instance_template" {
   DB_NAME=$(curl http://metadata.google.internal/computeMetadata/v1/instance/attributes/db-name -H "Metadata-Flavor: Google")
   DB_USER=$(curl http://metadata.google.internal/computeMetadata/v1/instance/attributes/db-user -H "Metadata-Flavor: Google")
   DB_PASSWORD=$(curl http://metadata.google.internal/computeMetadata/v1/instance/attributes/db-password -H "Metadata-Flavor: Google")
+  DOMAIN_NAME=$(curl http://metadata.google.internal/computeMetadata/v1/instance/attributes/domain-name -H "Metadata-Flavor: Google")
   sudo cp /var/www/html/wp-config-sample.php /var/www/html/wp-config.php
-  sudo sed -i "s/database_name_here/$DB_NAME/g" /var/www/html/wp-config.php
-  sudo sed -i "s/username_here/$DB_USER/g" /var/www/html/wp-config.php
-  sudo sed -i "s/password_here/$DB_PASSWORD/g" /var/www/html/wp-config.php
+  sudo bash -c "sed -i \"s/database_name_here/$DB_NAME/g\" /var/www/html/wp-config.php"
+  sudo bash -c "sed -i \"s/username_here/$DB_USER/g\" /var/www/html/wp-config.php"
+  sudo bash -c "sed -i \"s/password_here/$DB_PASSWORD/g\" /var/www/html/wp-config.php"
+  sudo bash -c "echo \"define('WP_HOME','http://$DOMAIN_NAME');\" >> /var/www/html/wp-config.php"
+  sudo bash -c "echo \"define('WP_SITEURL','http://$DOMAIN_NAME');\" >> /var/www/html/wp-config.php"
+  # Install Certbot and obtain an SSL certificate
+  sudo apt-get install -y certbot python-certbot-apache
+  sudo certbot --apache -n --agree-tos --email your-email@example.com -d $DOMAIN_NAME
+  # Update WordPress configuration to use HTTPS
+  sudo bash -c "echo \"define('WP_HOME','https://$DOMAIN_NAME');\" >> /var/www/html/wp-config.php"
+  sudo bash -c "echo \"define('WP_SITEURL','https://$DOMAIN_NAME');\" >> /var/www/html/wp-config.php"
 SCRIPT
+
+  disk {
+    source_image = data.google_compute_image.debian.self_link  
+  }
+  network_interface {
+    network = google_compute_network.dec_vpc_network.self_link  
+    access_config {
+    }
+  }
+}
 
   disk {
     source_image = data.google_compute_image.debian.self_link  
