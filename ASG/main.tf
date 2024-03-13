@@ -137,8 +137,8 @@ resource "google_sql_database_instance" "instance" {
 
 # Create a Cloud SQL user with the randomly generated password
 resource "google_sql_user" "users" {
-  provider = google-beta
   name     = "wordpressuser"
   instance = google_sql_database_instance.instance.name
   password = random_password.password.result
+  depends_on = [google_sql_database_instance.instance]
 }
