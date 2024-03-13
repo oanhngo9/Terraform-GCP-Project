@@ -25,7 +25,7 @@ resource "google_project" "dec_gcp_team_project" {
   project_id      = "gcp-${random_id.project_id.hex}"
   billing_account = data.google_billing_account.acct.id
 
-  depends_on = [random_id.project_id_suffix]
+  depends_on = [random_id.project_id]
 }
 
 # Set terminal to the project
